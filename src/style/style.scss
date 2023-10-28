@@ -1,0 +1,20 @@
+.is-empty {
+	&::before {
+		content: '入力してください...';
+		color: gray;
+		cursor: text;
+		font-style: italic;
+		opacity: 0.75;
+	}
+	&[data-placeholder]::before {
+		content: attr(data-placeholder);
+	}
+}
+[contenteditable] {
+	outline: 0px solid transparent !important;
+	&:active,
+	&:focus-visible,
+	&:focus {
+		outline: 0px solid transparent;
+	}
+}
