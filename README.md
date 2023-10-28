@@ -1,0 +1,26 @@
+# JavaScript Library Template
+
+This repository is a template for JavaScript Library.
+
+## Components
+
+You can see components with StoryBook..
+
+## How to use
+
+### Installation
+
+```bash
+npm install 
+```
+
+## Contributing
+
+We welcome contributions to the project! You can get involved through the following ways:
+
+[Issue](./issues): Use for bug reports, feature suggestions, and more.
+[Pull Requests](./pulls): We encourage code contributions for new features and bug fixes.
+
+## License
+
+See [LICENSE](./LICENSE).

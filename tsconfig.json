@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitAny": true,
+		"target": "es6",
+		"allowJs": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"strict": true,
+		"strictNullChecks": true,
+		"forceConsistentCasingInFileNames": true,
+		"noFallthroughCasesInSwitch": true,
+		"module": "esnext",
+		"jsx": "react-jsx",
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"emitDeclarationOnly": true,
+		"declaration": true,
+		"declarationDir": "./dist/esm",
+		"outDir": "./dist/esm",
+		"rootDir": "./src"
+	},
+	"include": ["src"],
+	"exclude": [],
+	"references": []
+}

@@ -1,0 +1,54 @@
+name: npm publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: "https://registry.npmjs.org"
+
+      - name: install
+        run: yarn install
+
+      - name: build
+        run: yarn build
+
+      - name: set version
+        run: node -p -e '`RELEASED_VERSION=v${require("./package.json").version}`' >> $GITHUB_ENV
+
+      - name: create release branch
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git branch release-${{ env.RELEASED_VERSION }}
+          git push -u origin release-${{ env.RELEASED_VERSION }}
+          git branch -a
+
+      - name: create release
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -d "{ \"tag_name\": \"${{ env.RELEASED_VERSION }}\", \"name\": \"${{ env.RELEASED_VERSION }}\", \"generate_release_notes\": true }" \
+            https://api.github.com/repos/${GITHUB_REPOSITORY}/releases
+      - name: publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
