@@ -1,23 +1,28 @@
-import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { createKey } from '.';
 import './style/style.css';
+import { Col, Form, OverlayTrigger, Popover, Row } from 'react-bootstrap';
 
-export type RichBlockTag = 'p';
-export type RichBlockTagElement = HTMLParagraphElement;
+export type RichBlockTag = 'p' | 'a' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+export type RichBlockEditTag = 'p' | 'span' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+export type RichBlockTagElement = HTMLParagraphElement | HTMLSpanElement | HTMLHeadingElement;
+export type RichBlockAttributeType = { [s: string]: string | number } & {
+	href?: string;
+	target?: string;
+};
+export type RichBlockStyleType = { [s: string]: string | number } & {
+	color?: string;
+	fontSize?: string;
+};
 export type RichBlockType = {
-	attributes?: { [s: string]: string | number };
+	attribute?: RichBlockAttributeType;
 	contents: string;
 	id: string;
-	style?: { [s: string]: string | number };
+	style?: RichBlockStyleType;
 	tag: RichBlockTag;
 };
-export type RichBlockEditType = {
-	attributes?: { [s: string]: string | number };
+export type RichBlockEditType = RichBlockType & {
 	caret?: number | 'last';
-	contents: string;
-	id: string;
-	style?: { [s: string]: string | number };
-	tag: RichBlockTag;
 };
 export const RichBlockDefault: RichBlockType = {
 	contents: '',
@@ -77,18 +82,23 @@ export default function Editor(props: EditorProps): JSX.Element {
 		</div>
 	);
 }
+export type getContentHandler = (key: number) => RichBlockEditType;
+export type changeContentHandler = (key: number, content?: RichBlockEditType | {}) => void;
+export type removeContentHandler = (key: number) => void;
 export type EditorItemProps = {
 	content: RichBlockEditType;
 	contentLength: number;
 	idx: number;
-	getContent: (key: number) => RichBlockEditType;
-	changeContent: (key: number, content?: RichBlockEditType | {}) => void;
-	removeContent: (key: number) => void;
+	getContent: getContentHandler;
+	changeContent: changeContentHandler;
+	removeContent: removeContentHandler;
 };
 export function EditorItem(props: EditorItemProps): JSX.Element {
 	const [Empty, setEmpty] = useState<boolean>(props.content.contents === '');
+	const [Focus, setFocus] = useState<boolean>(false);
 	const Content = useRef<string>(props.content.contents);
-	const contentEditableElement = useRef<RichBlockTagElement | null>(null);
+	const Tag: RichBlockEditTag = props.content.tag === 'a' ? 'span' : props.content.tag;
+	const contentEditableElement = useRef<RichBlockTagElement | any | null>(null);
 
 	useEffect(() => {
 		if (contentEditableElement.current === null) return;
@@ -97,6 +107,10 @@ export function EditorItem(props: EditorItemProps): JSX.Element {
 	useEffect(() => {
 		setEmpty(props.content.contents === '');
 	}, [props.content.contents]);
+	useEffect(() => {
+		if (contentEditableElement.current === null) return;
+		moveCaretLast(contentEditableElement.current);
+	}, [props.content.tag]);
 	useEffect(() => {
 		if (contentEditableElement.current === null || props.content.caret === undefined) return;
 		moveCaret(contentEditableElement.current, props.content.caret);
@@ -173,17 +187,129 @@ export function EditorItem(props: EditorItemProps): JSX.Element {
 		}
 		console.log(e.key);
 	}
+	function onFocus(): void {
+		setFocus(true);
+	}
+	function onBlur(): void {
+		setFocus(false);
+	}
 	return (
-		<props.content.tag
-			className={`${Empty ? 'is-empty' : ''}`}
-			data-placeholder="入力してください..."
-			contentEditable
-			onInput={onInput}
-			onKeyDown={onKeyDown}
-			ref={contentEditableElement}
-		>
-			{Content.current}
-		</props.content.tag>
+		<BlockMenu content={props.content} idx={props.idx} show={Focus} changeContent={props.changeContent}>
+			<Tag
+				className={`${Empty ? 'is-empty' : ''}`}
+				data-placeholder="入力してください..."
+				contentEditable
+				onInput={onInput}
+				onKeyDown={onKeyDown}
+				onFocus={onFocus}
+				onBlur={onBlur}
+				style={props.content.style}
+				{...props.content.attribute}
+				ref={contentEditableElement}
+			>
+				{Content.current}
+			</Tag>
+		</BlockMenu>
+	);
+}
+type BlockMenuProps = {
+	children: React.ReactElement;
+	content: RichBlockEditType;
+	idx: number;
+	show: boolean;
+	changeContent: changeContentHandler;
+};
+function BlockMenu(props: BlockMenuProps): JSX.Element {
+	const [Focus, setFocus] = useState<boolean>(false);
+	function onFocus(): void {
+		setFocus(true);
+	}
+	function onBlur(): void {
+		setFocus(false);
+	}
+	function changeTag(e: ChangeEvent<HTMLSelectElement>): void {
+		props.changeContent(props.idx, { tag: e.currentTarget.value });
+	}
+	function changeStyle(e: ChangeEvent<HTMLInputElement>): void {
+		const _style: RichBlockStyleType = { ...{}, ...props.content.style };
+		_style[e.currentTarget.name] = e.currentTarget.value;
+		props.changeContent(props.idx, { style: _style });
+	}
+	function changeAttr(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void {
+		const _attr: RichBlockAttributeType = { ...{}, ...props.content.attribute };
+		_attr[e.currentTarget.name] = e.currentTarget.value;
+		props.changeContent(props.idx, { attributes: _attr });
+	}
+	return (
+		<>
+			<OverlayTrigger
+				show={props.show || Focus}
+				placement="left"
+				overlay={
+					<Popover id={props.content.id} onFocus={onFocus} onBlur={onBlur}>
+						<Popover.Body>
+							<Row>
+								<Col xs="auto">
+									<select value={props.content.tag} onChange={changeTag}>
+										<option value="p">段落</option>
+										<option value="a">リンク</option>
+										<option value="h1">見出し1</option>
+										<option value="h2">見出し2</option>
+										<option value="h3">見出し3</option>
+										<option value="h4">見出し4</option>
+										<option value="h5">見出し5</option>
+										<option value="h6">見出し6</option>
+									</select>
+								</Col>
+								<Col xs="auto" className="border-start">
+									<div className="text-center">フォント</div>
+									<Row>
+										<Col xs="auto" className="pe-0 py-0">
+											<Form.Control
+												type="color"
+												name="color"
+												value={props.content.style?.color}
+												onChange={changeStyle}
+											/>
+										</Col>
+										<Col xs="auto" className="p-0">
+											<Form.Control
+												type="text"
+												name="fontSize"
+												placeholder="16px"
+												value={props.content.style?.fontSize}
+												onChange={changeStyle}
+												style={{ width: '70px' }}
+											/>
+										</Col>
+									</Row>
+								</Col>
+							</Row>
+							<Row className={`${props.content.tag === 'a' ? '' : 'd-none'} border-top`}>
+								<Col xs="auto" className={`${props.content.tag === 'a' ? '' : 'd-none'}`}>
+									<div className={`${props.content.tag === 'a' ? '' : 'd-none'}`}>
+										<div className="text-center">リンク</div>
+										<Form.Control
+											type="url"
+											name="href"
+											placeholder="https://"
+											value={props.content.attribute?.href}
+											onChange={changeAttr}
+										/>
+									</div>
+									<select name="target" value={props.content.attribute?.target} onChange={changeAttr}>
+										<option value="_self">同じタブで表示</option>
+										<option value="_blank">別タブで表示</option>
+									</select>
+								</Col>
+							</Row>
+						</Popover.Body>
+					</Popover>
+				}
+			>
+				{props.children}
+			</OverlayTrigger>
+		</>
 	);
 }
 
