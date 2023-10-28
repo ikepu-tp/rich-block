@@ -78,7 +78,6 @@ export default function Editor(props: EditorProps): JSX.Element {
 					/>
 				)
 			)}
-			<pre>{JSON.stringify(Contents, null, 2)}</pre>
 		</div>
 	);
 }
