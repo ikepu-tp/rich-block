@@ -1,14 +1,14 @@
 {
-  "name": "rich-block",
+  "name": "@ikepu-tp/rich-block",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier -w \"./src/**/*.{js,css,ts}\"",
+    "format": "prettier -w \"./src/**/*.{js,ts}\"",
     "build": "yarn format && vite build && tsc",
     "sb": "storybook dev -p 6006",
     "build-sb": "storybook build -o docs/ "
