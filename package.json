@@ -1,5 +1,5 @@
 {
-  "name": "js-lib-template",
+  "name": "rich-block",
   "type": "module",
   "version": "0.1.0",
   "description": "",
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ikepu-tp/js-lib-template.git"
+    "url": "git+https://github.com/ikepu-tp/rich-block.git"
   },
   "keywords": [
     "react",
@@ -25,9 +25,9 @@
   "author": "ikepu-tp",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ikepu-tp/js-lib-template/issues"
+    "url": "https://github.com/ikepu-tp/rich-block/issues"
   },
-  "homepage": "https://github.com/ikepu-tp/js-lib-template#readme",
+  "homepage": "https://github.com/ikepu-tp/rich-block#readme",
   "exports": {
     ".": {
       "require": "./dist/cjs/index.js",
