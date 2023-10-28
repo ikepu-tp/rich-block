@@ -1,21 +1,21 @@
 {
-  "name": "js-lib-template",
+  "name": "@ikepu-tp/rich-block",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier -w \"./src/**/*.{js,css,ts}\"",
+    "format": "prettier -w \"./src/**/*.{js,ts}\"",
     "build": "yarn format && vite build && tsc",
     "sb": "storybook dev -p 6006",
     "build-sb": "storybook build -o docs/ "
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ikepu-tp/js-lib-template.git"
+    "url": "git+https://github.com/ikepu-tp/rich-block.git"
   },
   "keywords": [
     "react",
@@ -25,9 +25,9 @@
   "author": "ikepu-tp",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ikepu-tp/js-lib-template/issues"
+    "url": "https://github.com/ikepu-tp/rich-block/issues"
   },
-  "homepage": "https://github.com/ikepu-tp/js-lib-template#readme",
+  "homepage": "https://github.com/ikepu-tp/rich-block#readme",
   "exports": {
     ".": {
       "require": "./dist/cjs/index.js",
