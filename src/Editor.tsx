@@ -44,7 +44,10 @@ export default function Editor(props: EditorProps): JSX.Element {
 	}, [Contents]);
 
 	function updateContent(contents: RichBlockEditType[]): void {
-		setContents(contents.concat());
+		setContents(() => contents.concat());
+	}
+	function getContent(key: number): RichBlockEditType {
+		return Contents[key];
 	}
 	function changeContent(key: number, content: RichBlockEditType | {} = {}): void {
 		Contents[key] = { ...(Contents[key] || getRichBlockDefault()), ...content };
@@ -64,11 +67,13 @@ export default function Editor(props: EditorProps): JSX.Element {
 						content={content}
 						contentLength={Contents.length}
 						idx={idx}
+						getContent={getContent}
 						changeContent={changeContent}
 						removeContent={removeContent}
 					/>
 				)
 			)}
+			<pre>{JSON.stringify(Contents, null, 2)}</pre>
 		</div>
 	);
 }
@@ -76,6 +81,7 @@ export type EditorItemProps = {
 	content: RichBlockEditType;
 	contentLength: number;
 	idx: number;
+	getContent: (key: number) => RichBlockEditType;
 	changeContent: (key: number, content?: RichBlockEditType | {}) => void;
 	removeContent: (key: number) => void;
 };
@@ -89,6 +95,9 @@ export function EditorItem(props: EditorItemProps): JSX.Element {
 		moveCaretLast(contentEditableElement.current);
 	}, []);
 	useEffect(() => {
+		setEmpty(props.content.contents === '');
+	}, [props.content.contents]);
+	useEffect(() => {
 		if (contentEditableElement.current === null || props.content.caret === undefined) return;
 		moveCaret(contentEditableElement.current, props.content.caret);
 		resetCaret();
@@ -98,16 +107,18 @@ export function EditorItem(props: EditorItemProps): JSX.Element {
 		props.changeContent(props.idx, { caret: undefined });
 	}
 	function onInput(e: FormEvent<RichBlockTagElement>): void {
-		const content: string = e.currentTarget.textContent || '';
-		setEmpty(content === '');
-		props.changeContent(props.idx, { ...props.content, contents: content });
+		props.changeContent(props.idx, { ...props.content, contents: e.currentTarget.textContent || '' });
 	}
 	function onKeyDown(e: KeyboardEvent<RichBlockTagElement>): void {
 		switch (e.key) {
 			case 'Enter':
-				if (e.shiftKey) break;
+				//if (e.shiftKey) break;
 				e.preventDefault();
-				props.changeContent(props.idx + 1, { caret: 0 });
+				const beforeText = e.currentTarget.textContent?.substring(0, getCurrentCaret());
+				const afterText = e.currentTarget.textContent?.substring(getCurrentCaret());
+				props.changeContent(props.idx, { contents: beforeText });
+				e.currentTarget.textContent = beforeText || '';
+				props.changeContent(props.idx + 1, { caret: 0, contents: afterText });
 				break;
 			case 'ArrowUp':
 				if (props.idx === 0) break;
@@ -120,14 +131,44 @@ export function EditorItem(props: EditorItemProps): JSX.Element {
 				props.changeContent(props.idx + 1, { caret: getCurrentCaret() });
 				break;
 			case 'ArrowLeft':
+				if (getCurrentCaret() !== 0 || props.idx === 0) break;
+				e.preventDefault();
+				props.changeContent(props.idx - 1, { caret: 'last' });
 				break;
 			case 'ArrowRight':
+				if (props.idx + 1 >= props.contentLength || getCurrentCaret() !== e.currentTarget.textContent?.length) break;
+				e.preventDefault();
+				props.changeContent(props.idx + 1, { caret: 0 });
 				break;
 			case 'Backspace':
-				if (e.currentTarget.textContent !== null && e.currentTarget.textContent !== '') break;
+				if (props.idx === 0) break;
 				e.preventDefault();
+				const prevContent = props.getContent(props.idx - 1)['contents'];
+				props.changeContent(props.idx - 1, {
+					caret: prevContent.length,
+					contents: prevContent + e.currentTarget.textContent,
+					id: createKey(),
+				});
 				props.removeContent(props.idx);
-				props.changeContent(props.idx - 1, { caret: 'last' });
+				break;
+			case 'Delete':
+				if (props.idx + 1 >= props.contentLength || getCurrentCaret() !== e.currentTarget.textContent?.length) break;
+				e.preventDefault();
+				const nextContent = props.getContent(props.idx + 1)['contents'];
+				props.changeContent(props.idx, {
+					caret: e.currentTarget.textContent.length,
+					contents: e.currentTarget.textContent + nextContent,
+					id: createKey(),
+				});
+				props.removeContent(props.idx + 1);
+				break;
+			case 'Home':
+				if (!e.ctrlKey) break;
+				props.changeContent(0, { caret: 0 });
+				break;
+			case 'End':
+				if (!e.ctrlKey) break;
+				props.changeContent(props.contentLength - 1, { caret: 'last' });
 				break;
 		}
 		console.log(e.key);
@@ -161,9 +202,10 @@ export function moveCaret(
 	}
 
 	const offset = contentEditableElement.innerText.length;
+	from = from > offset ? offset : from;
 	setRange(
 		contentEditableElement.firstChild,
-		from > offset ? offset : from,
+		from,
 		contentEditableElement.firstChild,
 		to === null ? from : to > offset ? offset : to
 	);
