@@ -38,5 +38,4 @@ jobs:
           git checkout -b gh-pages remotes/origin/gh-pages
           git add ./docs
           git commit -m "build sb"
-          git branch -a
           git push -u origin gh-pages
