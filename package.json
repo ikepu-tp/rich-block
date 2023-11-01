@@ -11,7 +11,7 @@
     "format": "prettier -w \"./src/**/*.{js,ts}\"",
     "build": "yarn format && vite build && tsc",
     "sb": "storybook dev -p 6006",
-    "build-sb": "storybook build -o docs/ "
+    "build-sb": "storybook build -o docs/ && touch ./docs/.nojekyll"
   },
   "repository": {
     "type": "git",
