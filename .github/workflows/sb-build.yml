@@ -29,7 +29,7 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git branch -a
-          git checkout -b gh-pages remotes/origin/gh-pages
+          git checkout -b gh-pages origin/gh-pages
           exit(1);
 
       - name: install
