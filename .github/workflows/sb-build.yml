@@ -1,0 +1,38 @@
+name: npm publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - stories/*
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: install
+        run: yarn install
+
+      - name: build
+        run: yarn build-sb
+
+      - name: push branch
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git branch main
+          git push -u origin main
