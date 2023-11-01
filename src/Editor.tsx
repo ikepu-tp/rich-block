@@ -15,7 +15,7 @@ export type RichBlockStyleType = { [s: string]: string | number } & {
 	fontSize?: string;
 };
 export type RichBlockType = {
-	attribute?: RichBlockAttributeType;
+	attributes?: RichBlockAttributeType;
 	contents: string;
 	id: string;
 	style?: RichBlockStyleType;
@@ -55,7 +55,7 @@ export default function Editor(props: EditorProps): JSX.Element {
 		return Contents[key];
 	}
 	function changeContent(key: number, content: RichBlockEditType | {} = {}): void {
-		Contents[key] = { ...(Contents[key] || getRichBlockDefault()), ...content };
+		Contents[key] = { ...{}, ...(Contents[key] || getRichBlockDefault()), ...content };
 		updateContent(Contents);
 	}
 	function removeContent(key: number): void {
@@ -154,7 +154,7 @@ export function EditorItem(props: EditorItemProps): JSX.Element {
 				props.changeContent(props.idx + 1, { caret: 0 });
 				break;
 			case 'Backspace':
-				if (props.idx === 0) break;
+				if (props.idx === 0 || getCurrentCaret() !== 0) break;
 				e.preventDefault();
 				const prevContent = props.getContent(props.idx - 1)['contents'];
 				props.changeContent(props.idx - 1, {
@@ -184,7 +184,7 @@ export function EditorItem(props: EditorItemProps): JSX.Element {
 				props.changeContent(props.contentLength - 1, { caret: 'last' });
 				break;
 		}
-		console.log(e.key);
+		//console.log(e.key);
 	}
 	function onFocus(): void {
 		setFocus(true);
@@ -203,7 +203,7 @@ export function EditorItem(props: EditorItemProps): JSX.Element {
 				onFocus={onFocus}
 				onBlur={onBlur}
 				style={props.content.style}
-				{...props.content.attribute}
+				{...props.content.attributes}
 				ref={contentEditableElement}
 			>
 				{Content.current}
@@ -235,7 +235,7 @@ function BlockMenu(props: BlockMenuProps): JSX.Element {
 		props.changeContent(props.idx, { style: _style });
 	}
 	function changeAttr(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void {
-		const _attr: RichBlockAttributeType = { ...{}, ...props.content.attribute };
+		const _attr: RichBlockAttributeType = { ...{}, ...props.content.attributes };
 		_attr[e.currentTarget.name] = e.currentTarget.value;
 		props.changeContent(props.idx, { attributes: _attr });
 	}
@@ -292,11 +292,11 @@ function BlockMenu(props: BlockMenuProps): JSX.Element {
 											type="url"
 											name="href"
 											placeholder="https://"
-											value={props.content.attribute?.href}
+											value={props.content.attributes?.href}
 											onChange={changeAttr}
 										/>
 									</div>
-									<select name="target" value={props.content.attribute?.target} onChange={changeAttr}>
+									<select name="target" value={props.content.attributes?.target} onChange={changeAttr}>
 										<option value="_self">同じタブで表示</option>
 										<option value="_blank">別タブで表示</option>
 									</select>

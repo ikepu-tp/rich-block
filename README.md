@@ -4,7 +4,7 @@ This library is an editor for rich block like WYSIWYG but this is NOT WYSIWYG.
 
 ## Components
 
-You can see components with StoryBook. [See](https://ikepu-tp.github.io/rich-block/docs)
+You can see components with StoryBook. [See](https://ikepu-tp.github.io/rich-block)
 
 ## How to use
 
