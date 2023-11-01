@@ -28,7 +28,9 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git branch -a
+          git branch -r
+          git fetch --prune
+          git branch -r
           git checkout -b gh-pages origin/gh-pages
           exit(1);
 
