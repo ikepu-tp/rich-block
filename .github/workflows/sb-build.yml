@@ -36,4 +36,5 @@ jobs:
           git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add .
           git commit -m "build sb"
+          git branch -a
           git push -u origin gh-pages
