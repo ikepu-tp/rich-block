@@ -1,0 +1,1 @@
+.is-empty:before{content:"入力してください...";color:gray;cursor:text;font-style:italic;opacity:.75}.is-empty[data-placeholder]:before{content:attr(data-placeholder)}[contenteditable]{outline:0px solid rgba(0,0,0,0)!important}[contenteditable]:active,[contenteditable]:focus-visible,[contenteditable]:focus{outline:0px solid rgba(0,0,0,0)}
