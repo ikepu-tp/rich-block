@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - stories/*
+      - "stories/**"
   workflow_dispatch:
 
 jobs:
